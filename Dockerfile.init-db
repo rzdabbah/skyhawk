@@ -1,0 +1,15 @@
+FROM postgres:15-alpine
+
+# Install necessary tools
+RUN apk add --no-cache bash
+
+# Copy initialization scripts
+COPY init-db.sh /docker-entrypoint-initdb.d/01-init-db.sh
+COPY schema.sql /docker-entrypoint-initdb.d/02-schema.sql
+COPY data.sql /docker-entrypoint-initdb.d/03-data.sql
+
+# Make the script executable
+RUN chmod +x /docker-entrypoint-initdb.d/01-init-db.sh
+
+# Set the entrypoint to our initialization script
+ENTRYPOINT ["/docker-entrypoint-initdb.d/01-init-db.sh"] 

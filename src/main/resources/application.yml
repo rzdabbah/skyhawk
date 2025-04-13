@@ -1,0 +1,19 @@
+spring:
+  application:
+    name: nba-stats
+  datasource:
+    url: jdbc:postgresql://localhost:5432/nba_stats
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+
+server:
+  port: 8080
+  tomcat:
+    max-threads: 200
+    min-spare-threads: 10
+
+logging:
+  level:
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE 
