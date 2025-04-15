@@ -2,6 +2,7 @@
 DROP TABLE IF EXISTS player_stats;
 DROP TABLE IF EXISTS players;
 DROP TABLE IF EXISTS teams;
+DROP TABLE IF EXISTS games;
 
 -- Create teams table
 CREATE TABLE teams (
@@ -19,11 +20,21 @@ CREATE TABLE players (
     UNIQUE (team_id, jersey_number)
 );
 
+-- Create games table
+CREATE TABLE games (
+    id SERIAL PRIMARY KEY,
+    game_date TIMESTAMP NOT NULL,
+    home_team_id INTEGER NOT NULL REFERENCES teams(id),
+    away_team_id INTEGER NOT NULL REFERENCES teams(id),
+    home_team_score INTEGER NOT NULL CHECK (home_team_score >= 0),
+    away_team_score INTEGER NOT NULL CHECK (away_team_score >= 0)
+);
+
 -- Create player_stats table
 CREATE TABLE player_stats (
     id SERIAL PRIMARY KEY,
     player_id INTEGER NOT NULL REFERENCES players(id),
-    game_date TIMESTAMP NOT NULL,
+    game_id INTEGER NOT NULL REFERENCES games(id),
     points INTEGER NOT NULL CHECK (points >= 0),
     rebounds INTEGER NOT NULL CHECK (rebounds >= 0),
     assists INTEGER NOT NULL CHECK (assists >= 0),
@@ -36,4 +47,8 @@ CREATE TABLE player_stats (
 
 -- Create indexes
 CREATE INDEX idx_player_stats_player_id ON player_stats(player_id);
-CREATE INDEX idx_players_team_id ON players(team_id); 
+CREATE INDEX idx_player_stats_game_id ON player_stats(game_id);
+CREATE INDEX idx_players_team_id ON players(team_id);
+CREATE INDEX idx_games_home_team_id ON games(home_team_id);
+CREATE INDEX idx_games_away_team_id ON games(away_team_id);
+CREATE INDEX idx_games_game_date ON games(game_date); 

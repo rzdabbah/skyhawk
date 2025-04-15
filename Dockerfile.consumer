@@ -5,7 +5,7 @@ WORKDIR /workspace/app
 COPY . .
 
 # Build the application
-RUN mvn clean package -DskipTests
+RUN mvn  package -DskipTests
 
 FROM eclipse-temurin:17-jre-alpine
 WORKDIR /app

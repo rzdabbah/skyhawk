@@ -48,7 +48,11 @@ public class PlayerRepository {
             return ps;
         }, keyHolder);
         
-        player.setId(keyHolder.getKey().longValue());
+        Number key = keyHolder.getKey();
+        if (key == null) {
+            throw new IllegalStateException("Failed to retrieve generated key for player");
+        }
+        player.setId(key.longValue());
         return player;
     }
 
