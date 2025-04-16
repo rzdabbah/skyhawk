@@ -25,7 +25,7 @@ public class PlayerStatsRepository {
         PlayerStats stats = new PlayerStats();
         stats.setId(rs.getLong("id"));
         stats.setPlayerId(rs.getLong("player_id"));
-        stats.setGameDate(rs.getTimestamp("game_date").toLocalDateTime());
+        stats.setGameId(rs.getLong("game_id"));
         stats.setPoints(rs.getInt("points"));
         stats.setRebounds(rs.getInt("rebounds"));
         stats.setAssists(rs.getInt("assists"));
@@ -46,14 +46,14 @@ public class PlayerStatsRepository {
     }
 
     private PlayerStats insert(PlayerStats stats) {
-        String sql = "INSERT INTO player_stats (player_id, game_date, points, rebounds, assists, steals, blocks, fouls, turnovers, minutes_played) " +
+        String sql = "INSERT INTO player_stats (player_id, game_id, points, rebounds, assists, steals, blocks, fouls, turnovers, minutes_played) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
         
         jdbcTemplate.update(connection -> {
             PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
             ps.setLong(1, stats.getPlayerId());
-            ps.setTimestamp(2, java.sql.Timestamp.valueOf(stats.getGameDate()));
+            ps.setLong(2, stats.getGameId());
             ps.setInt(3, stats.getPoints());
             ps.setInt(4, stats.getRebounds());
             ps.setInt(5, stats.getAssists());
@@ -65,16 +65,20 @@ public class PlayerStatsRepository {
             return ps;
         }, keyHolder);
         
-        stats.setId(keyHolder.getKey().longValue());
+        Number key = keyHolder.getKey();
+        if (key == null) {
+            throw new IllegalStateException("Failed to retrieve generated key for player stats");
+        }
+        stats.setId(key.longValue());
         return stats;
     }
 
     private PlayerStats update(PlayerStats stats) {
-        String sql = "UPDATE player_stats SET player_id = ?, game_date = ?, points = ?, rebounds = ?, assists = ?, " +
+        String sql = "UPDATE player_stats SET player_id = ?, game_id = ?, points = ?, rebounds = ?, assists = ?, " +
                 "steals = ?, blocks = ?, fouls = ?, turnovers = ?, minutes_played = ? WHERE id = ?";
         jdbcTemplate.update(sql, 
                 stats.getPlayerId(), 
-                java.sql.Timestamp.valueOf(stats.getGameDate()),
+                stats.getGameId(),
                 stats.getPoints(), 
                 stats.getRebounds(), 
                 stats.getAssists(), 
@@ -142,13 +146,13 @@ public class PlayerStatsRepository {
     }
 
     public void saveAll(List<PlayerStats> statsList) {
-        String sql = "INSERT INTO player_stats (player_id, game_date, points, rebounds, assists, " +
+        String sql = "INSERT INTO player_stats (player_id, game_id, points, rebounds, assists, " +
                 "steals, blocks, fouls, turnovers, minutes_played) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         
         jdbcTemplate.batchUpdate(sql, statsList, statsList.size(),
                 (ps, stats) -> {
                     ps.setLong(1, stats.getPlayerId());
-                    ps.setTimestamp(2, java.sql.Timestamp.valueOf(stats.getGameDate()));
+                    ps.setLong(2, stats.getGameId());
                     ps.setInt(3, stats.getPoints());
                     ps.setInt(4, stats.getRebounds());
                     ps.setInt(5, stats.getAssists());

@@ -7,7 +7,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class Player {
     private Long id;
-    private String name;
+    private String firstName;
+    private String lastName;
     private Long teamId;
     private Integer jerseyNumber;
 } 

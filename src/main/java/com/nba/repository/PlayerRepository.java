@@ -22,7 +22,8 @@ public class PlayerRepository {
     private final RowMapper<Player> playerRowMapper = (ResultSet rs, int rowNum) -> {
         Player player = new Player();
         player.setId(rs.getLong("id"));
-        player.setName(rs.getString("name"));
+        player.setFirstName(rs.getString("first_name"));
+        player.setLastName(rs.getString("last_name"));
         player.setTeamId(rs.getLong("team_id"));
         player.setJerseyNumber(rs.getObject("jersey_number", Integer.class));
         return player;
@@ -37,14 +38,15 @@ public class PlayerRepository {
     }
 
     private Player insert(Player player) {
-        String sql = "INSERT INTO players (name, team_id, jersey_number) VALUES (?, ?, ?)";
+        String sql = "INSERT INTO players (first_name, last_name, team_id, jersey_number) VALUES (?, ?, ?, ?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
         
         jdbcTemplate.update(connection -> {
             PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-            ps.setString(1, player.getName());
-            ps.setLong(2, player.getTeamId());
-            ps.setObject(3, player.getJerseyNumber());
+            ps.setString(1, player.getFirstName());
+            ps.setString(2, player.getLastName());
+            ps.setLong(3, player.getTeamId());
+            ps.setObject(4, player.getJerseyNumber());
             return ps;
         }, keyHolder);
         
@@ -57,8 +59,8 @@ public class PlayerRepository {
     }
 
     private Player update(Player player) {
-        String sql = "UPDATE players SET name = ?, team_id = ?, jersey_number = ? WHERE id = ?";
-        jdbcTemplate.update(sql, player.getName(), player.getTeamId(), player.getJerseyNumber(), player.getId());
+        String sql = "UPDATE players SET first_name = ?, last_name = ?, team_id = ?, jersey_number = ? WHERE id = ?";
+        jdbcTemplate.update(sql, player.getFirstName(), player.getLastName(), player.getTeamId(), player.getJerseyNumber(), player.getId());
         return player;
     }
 
