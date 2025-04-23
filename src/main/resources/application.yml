@@ -2,10 +2,9 @@ spring:
   application:
     name: nba-stats
   datasource:
-    #url: jdbc:postgresql://skyhawk-db-1:5432/nba_stats
-    url: jdbc:postgresql://localhost:5432/nba_stats
-    username: postgres
-    password: postgres
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/postgres}
+    username: ${SPRING_DATASOURCE_USERNAME:postgres}
+    password: ${SPRING_DATASOURCE_PASSWORD:postgres}
     driver-class-name: org.postgresql.Driver
   sql:
     init:

@@ -18,7 +18,7 @@ public class StatisticsService {
 
     public Map<String, Object> getPlayerStatistics(Long playerId, LocalDateTime startDate, LocalDateTime endDate) {
         StringBuilder sqlBuilder = new StringBuilder();
-        sqlBuilder.append("SELECT p.first_name, p.last_name, t.name as team_name, ")
+        sqlBuilder.append("SELECT p.name, t.name as team_name, ")
                  .append("COUNT(DISTINCT ps.game_id) as games_played, ")
                  .append("SUM(ps.points) as total_points, ")
                  .append("AVG(ps.points) as avg_points, ")
@@ -53,7 +53,7 @@ public class StatisticsService {
             types.add(java.sql.Types.TIMESTAMP);
         }
 
-        sqlBuilder.append("GROUP BY p.id, p.first_name, p.last_name, t.name");
+        sqlBuilder.append("GROUP BY p.id, p.name, t.name");
 
         return jdbcTemplate.queryForMap(
             sqlBuilder.toString(),
@@ -130,7 +130,7 @@ public class StatisticsService {
     public List<Map<String, Object>> getGameEvents(Long gameId, String eventType, LocalDateTime startTime, LocalDateTime endTime) {
         StringBuilder sqlBuilder = new StringBuilder();
         sqlBuilder.append("SELECT ge.id, ge.event_type, ge.event_time, ")
-                 .append("p.first_name, p.last_name, t.name as team_name, ")
+                 .append("p.name, t.name as team_name, ")
                  .append("ge.event_data ")
                  .append("FROM game_events ge ")
                  .append("LEFT JOIN players p ON ge.player_id = p.id ")
@@ -182,7 +182,7 @@ public class StatisticsService {
         };
 
         StringBuilder sqlBuilder = new StringBuilder();
-        sqlBuilder.append("SELECT p.first_name, p.last_name, t.name as team_name, ")
+        sqlBuilder.append("SELECT p.name, t.name as team_name, ")
                  .append("SUM(ps.").append(column).append(") as total_").append(column).append(", ")
                  .append("AVG(ps.").append(column).append(") as avg_").append(column).append(", ")
                  .append("COUNT(DISTINCT ps.game_id) as games_played ")
@@ -207,7 +207,7 @@ public class StatisticsService {
             types.add(java.sql.Types.TIMESTAMP);
         }
 
-        sqlBuilder.append("GROUP BY p.id, p.first_name, p.last_name, t.name ")
+        sqlBuilder.append("GROUP BY p.id, p.name, t.name ")
                  .append("ORDER BY total_").append(column).append(" DESC ")
                  .append("LIMIT ?");
         

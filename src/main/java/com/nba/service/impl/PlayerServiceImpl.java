@@ -27,8 +27,7 @@ public class PlayerServiceImpl implements PlayerService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Team not found"));
 
         Player player = new Player();
-        player.setFirstName(playerDTO.getFirstName());
-        player.setLastName(playerDTO.getLastName());
+        player.setName(playerDTO.getFirstName() + " " + playerDTO.getLastName());
         player.setTeamId(playerDTO.getTeamId());
         player.setJerseyNumber(playerDTO.getJerseyNumber());
 

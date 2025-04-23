@@ -1,6 +1,5 @@
 package com.nba.service;
 
-import com.nba.config.RabbitMQConfig;
 import com.nba.domain.PlayerStats;
 import com.nba.event.PlayerStatsEvent;
 import com.nba.repository.PlayerStatsRepository;
@@ -9,7 +8,7 @@ import com.nba.domain.Game;
 import io.micrometer.core.instrument.MeterRegistry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -31,8 +30,9 @@ public class StatsConsumerService {
     private static final long FLUSH_INTERVAL_MS = 5000; // 5 seconds
     private final List<PlayerStats> statsBuffer = new ArrayList<>();
     private long lastFlushTime = System.currentTimeMillis();
+    private static final String TOPIC = "player.stats.topic";
 
-    @RabbitListener(queues = RabbitMQConfig.QUEUE_PLAYER_STATS)
+    @KafkaListener(topics = TOPIC, groupId = "nba-stats-group")
     @Retryable(
         value = {Exception.class},
         maxAttempts = 3,
@@ -78,14 +78,15 @@ public class StatsConsumerService {
                 lastFlushTime = currentTime;
             }
 
-            long processingTime = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startTime);
-            meterRegistry.timer("stats.processing.time").record(processingTime, TimeUnit.MILLISECONDS);
-            meterRegistry.counter("stats.processed").increment();
+            // Record metrics
+            if (meterRegistry != null) {
+                meterRegistry.timer("player.stats.processing.time").record(
+                    System.nanoTime() - startTime, TimeUnit.NANOSECONDS);
+            }
             
-            log.info("Successfully processed stats for player: {} in {}ms", event.getPlayerId(), processingTime);
+            log.info("Successfully processed stats for player: {} in {}ms", event.getPlayerId(), TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startTime));
         } catch (Exception e) {
-            meterRegistry.counter("stats.processing.errors").increment();
-            log.error("Failed to process stats for player: {}", event.getPlayerId(), e);
+            log.error("Error processing player stats for player: {}", event.getPlayerId(), e);
             throw e;
         }
     }

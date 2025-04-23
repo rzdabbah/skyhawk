@@ -1,5 +1,5 @@
 -- Insert teams
-INSERT INTO teams (name, city) VALUES
+     (name, city) VALUES
 ('Lakers', 'Los Angeles'),
 ('Celtics', 'Boston'),
 ('Bulls', 'Chicago'),

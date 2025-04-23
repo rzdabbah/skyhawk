@@ -163,4 +163,25 @@ public class PlayerStatsRepository {
                     ps.setFloat(10, stats.getMinutesPlayed());
                 });
     }
+
+    public Map<String, Double> calculateGameAverages(Long gameId) {
+        String sql = "SELECT " +
+                "SUM(points) as points, " +
+                "SUM(rebounds) as rebounds, " +
+                "SUM(assists) as assists, " +
+                "SUM(steals) as steals, " +
+                "SUM(blocks) as blocks, " +
+                "SUM(fouls) as fouls, " +
+                "SUM(turnovers) as turnovers, " +
+                "AVG(minutes_played) as minutes_played " +
+                "FROM player_stats " +
+                "WHERE game_id = ?";
+        
+        Map<String, Object> result = jdbcTemplate.queryForMap(sql, gameId);
+        return result.entrySet().stream()
+                .collect(Collectors.toMap(
+                    Map.Entry::getKey,
+                    e -> ((Number) e.getValue()).doubleValue()
+                ));
+    }
 } 

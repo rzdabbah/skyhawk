@@ -6,6 +6,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -34,6 +35,12 @@ public class GameRepository {
                 .findFirst();
     }
 
+    public Optional<Game> findById(Long id) {
+        String sql = "SELECT * FROM games WHERE id = ?";
+        List<Game> games = jdbcTemplate.query(sql, gameRowMapper, id);
+        return games.isEmpty() ? Optional.empty() : Optional.of(games.get(0));
+    }
+
     public Game save(Game game) {
         if (game.getId() == null) {
             return insert(game);
@@ -43,14 +50,19 @@ public class GameRepository {
     }
 
     private Game insert(Game game) {
+        if (game.getHomeTeamId() == null || game.getAwayTeamId() == null) {
+            throw new IllegalStateException("Cannot insert game with null team IDs. Home: " + 
+                game.getHomeTeamId() + ", Away: " + game.getAwayTeamId());
+        }
+        
         String sql = "INSERT INTO games (game_date, home_team_id, away_team_id, home_team_score, away_team_score) " +
                     "VALUES (?, ?, ?, ?, ?) RETURNING *";
         return jdbcTemplate.queryForObject(sql, gameRowMapper,
                 game.getGameDate(),
                 game.getHomeTeamId(),
                 game.getAwayTeamId(),
-                game.getHomeTeamScore(),
-                game.getAwayTeamScore());
+                game.getHomeTeamScore() != null ? game.getHomeTeamScore() : 0,
+                game.getAwayTeamScore() != null ? game.getAwayTeamScore() : 0);
     }
 
     private Game update(Game game) {
