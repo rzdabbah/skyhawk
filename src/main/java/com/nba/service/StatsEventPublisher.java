@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class PlayerStatsEventPublisher {
+public class StatsEventPublisher {
     private final KafkaTemplate<String, PlayerStatsEvent> kafkaTemplate;
     private static final String TOPIC = "player.stats.topic";
 

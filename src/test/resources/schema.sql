@@ -17,9 +17,8 @@ CREATE TABLE players (
     first_name VARCHAR(100) NOT NULL,
     last_name VARCHAR(100) NOT NULL,
     team_id BIGINT NOT NULL,
-    jersey_number INTEGER,
     FOREIGN KEY (team_id) REFERENCES teams(id),
-    UNIQUE (team_id, jersey_number)
+    UNIQUE (team_id)
 );
 
 -- Create games table

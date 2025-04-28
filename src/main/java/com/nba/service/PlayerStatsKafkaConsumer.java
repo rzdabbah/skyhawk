@@ -5,7 +5,7 @@ import com.nba.domain.Game;
 import com.nba.domain.Team;
 import com.nba.domain.Player;
 import com.nba.event.PlayerStatsEvent;
-import com.nba.repository.PlayerStatsRepository;
+import com.nba.repository.StatsRepository;
 import com.nba.repository.GameRepository;
 import com.nba.repository.TeamRepository;
 import com.nba.repository.PlayerRepository;
@@ -20,7 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Component
 @RequiredArgsConstructor
 public class PlayerStatsKafkaConsumer {
-    private final PlayerStatsRepository playerStatsRepository;
+    private final StatsRepository playerStatsRepository;
     private final GameRepository gameRepository;
     private final TeamRepository teamRepository;
     private final PlayerRepository playerRepository;

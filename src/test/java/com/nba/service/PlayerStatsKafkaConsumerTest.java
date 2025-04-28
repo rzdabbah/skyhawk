@@ -7,7 +7,7 @@ import com.nba.domain.Team;
 import com.nba.event.PlayerStatsEvent;
 import com.nba.repository.GameRepository;
 import com.nba.repository.PlayerRepository;
-import com.nba.repository.PlayerStatsRepository;
+import com.nba.repository.StatsRepository;
 import com.nba.repository.TeamRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,7 +30,7 @@ import static org.mockito.Mockito.*;
 class PlayerStatsKafkaConsumerTest {
 
     @Mock
-    private PlayerStatsRepository playerStatsRepository;
+    private StatsRepository playerStatsRepository;
 
     @Mock
     private GameRepository gameRepository;
@@ -169,20 +169,7 @@ class PlayerStatsKafkaConsumerTest {
         verify(playerStatsRepository, never()).save(any(PlayerStats.class));
     }
 
-    private Long createTestTeam() {
-        jdbcTemplate.update("INSERT INTO teams (id, name, city) VALUES (DEFAULT, ?, ?)", "Test Team", "Test City");
-        return jdbcTemplate.queryForObject("SELECT IDENTITY()", Long.class);
-    }
+   
 
-    private Long createTestPlayer() {
-        jdbcTemplate.update("INSERT INTO players (id, first_name, last_name, team_id) VALUES (DEFAULT, ?, ?, ?)", "Test", "Player", teamId);
-        return jdbcTemplate.queryForObject("SELECT IDENTITY()", Long.class);
-    }
-
-    private Long createTestGame() {
-        // Create a second team for the away team
-        Long awayTeamId = createTestTeam();
-        jdbcTemplate.update("INSERT INTO games (id, game_date, home_team_id, away_team_id) VALUES (DEFAULT, ?, ?, ?)", LocalDate.now(), teamId, awayTeamId);
-        return jdbcTemplate.queryForObject("SELECT IDENTITY()", Long.class);
-    }
+    
 } 

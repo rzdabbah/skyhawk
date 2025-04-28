@@ -1,7 +1,7 @@
 package com.nba.controller;
 
 import com.nba.event.GameStatsEvent;
-import com.nba.service.GameStatsService;
+import com.nba.service.StatsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -10,17 +10,13 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/game-stats")
 @RequiredArgsConstructor
 public class GameStatsController {
-    private final GameStatsService gameStatsService;
+    private final StatsService statsService;
 
     @PostMapping("/events")
     public ResponseEntity<GameStatsEvent> publishGameStatsEvent(@RequestBody GameStatsEvent event) {
-        GameStatsEvent publishedEvent = gameStatsService.publishGameStatsEvent(event);
+        GameStatsEvent publishedEvent = statsService.publishGameStatsEvent(event);
         return ResponseEntity.ok(publishedEvent);
     }
 
-    @PostMapping("/games/{gameId}/calculate")
-    public ResponseEntity<GameStatsEvent> calculateAndPublishGameStats(@PathVariable Long gameId) {
-        GameStatsEvent event = gameStatsService.calculateAndPublishGameStats(gameId);
-        return ResponseEntity.ok(event);
-    }
+   
 } 

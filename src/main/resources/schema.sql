@@ -1,54 +1,89 @@
--- Drop tables if they exist
-DROP TABLE IF EXISTS player_stats;
-DROP TABLE IF EXISTS players;
-DROP TABLE IF EXISTS teams;
-DROP TABLE IF EXISTS games;
-
 -- Create teams table
-CREATE TABLE teams (
+DROP TABLE IF EXISTS teams cascade;
+DROP TABLE IF EXISTS players cascade;
+DROP TABLE IF EXISTS games cascade;
+DROP TABLE IF EXISTS game_events cascade;
+DROP TABLE IF EXISTS player_stats cascade;
+
+
+
+
+CREATE TABLE IF NOT EXISTS teams (
     id SERIAL PRIMARY KEY,
-    name VARCHAR(100) NOT NULL UNIQUE,
-    city VARCHAR(100) NOT NULL UNIQUE
+    name VARCHAR(100) NOT NULL,
+    city VARCHAR(100) NOT NULL,
+    conference VARCHAR(50),
+    division VARCHAR(50),
+    founded_year INTEGER,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Create players table
-CREATE TABLE players (
+CREATE TABLE IF NOT EXISTS players (
     id SERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
-    team_id INTEGER NOT NULL REFERENCES teams(id),
+    team_id INTEGER REFERENCES teams(id),
     jersey_number INTEGER,
-    UNIQUE (team_id, jersey_number)
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (team_id) REFERENCES teams(id)
 );
 
 -- Create games table
-CREATE TABLE games (
+CREATE TABLE IF NOT EXISTS games (
     id SERIAL PRIMARY KEY,
-    game_date TIMESTAMP NOT NULL,
-    home_team_id INTEGER NOT NULL REFERENCES teams(id),
-    away_team_id INTEGER NOT NULL REFERENCES teams(id),
-    home_team_score INTEGER NOT NULL CHECK (home_team_score >= 0),
-    away_team_score INTEGER NOT NULL CHECK (away_team_score >= 0)
+    home_team_id INTEGER REFERENCES teams(id),
+    away_team_id INTEGER REFERENCES teams(id),
+    game_date TIMESTAMP WITH TIME ZONE NOT NULL,
+    home_team_score INTEGER,
+    away_team_score INTEGER,
+    season VARCHAR(10),
+    status VARCHAR(50) DEFAULT 'SCHEDULED',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (home_team_id) REFERENCES  teams(id),
+    FOREIGN KEY (away_team_id) REFERENCES  teams(id)
+
 );
 
--- Create player_stats table
-CREATE TABLE player_stats (
+-- Create events table for tracking all game events
+CREATE TABLE IF NOT EXISTS game_events (
     id SERIAL PRIMARY KEY,
-    player_id INTEGER NOT NULL REFERENCES players(id),
-    game_id INTEGER NOT NULL REFERENCES games(id),
-    points INTEGER NOT NULL CHECK (points >= 0),
-    rebounds INTEGER NOT NULL CHECK (rebounds >= 0),
-    assists INTEGER NOT NULL CHECK (assists >= 0),
-    steals INTEGER NOT NULL CHECK (steals >= 0),
-    blocks INTEGER NOT NULL CHECK (blocks >= 0),
-    fouls INTEGER NOT NULL CHECK (fouls >= 0 AND fouls <= 6),
-    turnovers INTEGER NOT NULL CHECK (turnovers >= 0),
-    minutes_played FLOAT NOT NULL CHECK (minutes_played >= 0 AND minutes_played <= 48)
+    game_id INTEGER REFERENCES games(id),
+    event_type VARCHAR(50) NOT NULL,
+    event_time TIMESTAMP WITH TIME ZONE NOT NULL,
+    player_id INTEGER REFERENCES players(id),
+    team_id INTEGER REFERENCES teams(id),
+    event_data JSONB NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (game_id) REFERENCES games(id)
 );
 
--- Create indexes
-CREATE INDEX idx_player_stats_player_id ON player_stats(player_id);
+-- Create player_stats table with event-based updates
+CREATE TABLE IF NOT EXISTS player_stats (
+    id SERIAL PRIMARY KEY,
+    player_id INTEGER REFERENCES players(id),
+    game_id INTEGER REFERENCES games(id),
+    points INTEGER DEFAULT 0,
+    rebounds INTEGER DEFAULT 0,
+    assists INTEGER DEFAULT 0,
+    steals INTEGER DEFAULT 0,
+    blocks INTEGER DEFAULT 0,
+    fouls INTEGER DEFAULT 0,
+    turnovers INTEGER DEFAULT 0,
+    minutes_played INTEGER DEFAULT 0,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (player_id) REFERENCES players(id),
+    FOREIGN KEY (game_id) REFERENCES games(id)
+
+);
+
+-- Create indexes for better query performance
+CREATE INDEX idx_game_events_game_id ON game_events(game_id);
+CREATE INDEX idx_game_events_event_time ON game_events(event_time);
+CREATE INDEX idx_game_events_event_type ON game_events(event_type);
 CREATE INDEX idx_player_stats_game_id ON player_stats(game_id);
-CREATE INDEX idx_players_team_id ON players(team_id);
-CREATE INDEX idx_games_home_team_id ON games(home_team_id);
-CREATE INDEX idx_games_away_team_id ON games(away_team_id);
-CREATE INDEX idx_games_game_date ON games(game_date); 
+CREATE INDEX idx_player_stats_player_id ON player_stats(player_id);
+

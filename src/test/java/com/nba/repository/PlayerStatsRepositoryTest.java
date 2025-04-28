@@ -23,7 +23,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class PlayerStatsRepositoryTest {
 
     @Autowired
-    private PlayerStatsRepository playerStatsRepository;
+    private StatsRepository playerStatsRepository;
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
@@ -54,7 +54,6 @@ class PlayerStatsRepositoryTest {
         testStats.setSteals(2);
         testStats.setBlocks(1);
         testStats.setFouls(3);
-        testStats.setTurnovers(2);
         testStats.setMinutesPlayed(35.5f);
     }
 
@@ -151,18 +150,6 @@ class PlayerStatsRepositoryTest {
         assertThat(averages.get("REBOUNDS")).isEqualTo(10.0);
     }
 
-    @Test
-    void calculateGameAverages_ShouldReturnAverages() {
-        // Given
-        playerStatsRepository.save(testStats);
 
-        // When
-        Map<String, Double> averages = playerStatsRepository.calculateGameAverages(gameId);
-
-        // Then
-        assertThat(averages).isNotEmpty();
-        assertThat(averages.get("POINTS")).isEqualTo(25.0);
-        assertThat(averages.get("REBOUNDS")).isEqualTo(10.0);
-    }
     
 } 

@@ -2,7 +2,7 @@ package com.nba.service;
 
 import com.nba.domain.PlayerStats;
 import com.nba.event.PlayerStatsEvent;
-import com.nba.repository.PlayerStatsRepository;
+import com.nba.repository.StatsRepository;
 import com.nba.repository.GameRepository;
 import com.nba.domain.Game;
 import io.micrometer.core.instrument.MeterRegistry;
@@ -23,7 +23,7 @@ import java.util.concurrent.TimeUnit;
 @Service
 @RequiredArgsConstructor
 public class StatsConsumerService {
-    private final PlayerStatsRepository playerStatsRepository;
+    private final StatsRepository playerStatsRepository;
     private final GameRepository gameRepository;
     private final MeterRegistry meterRegistry;
     private static final int BATCH_SIZE = 100;
@@ -42,19 +42,10 @@ public class StatsConsumerService {
     public void processPlayerStats(PlayerStatsEvent event) {
         long startTime = System.nanoTime();
         try {
-            log.info("Processing player stats for player: {}", event.getPlayerId());
+            log.info("Processing player stats for player: {}", event);
             
             // First, ensure we have a game record
-            Game game = gameRepository.findByGameDate(event.getGameDate())
-                .orElseGet(() -> {
-                    Game newGame = new Game();
-                    newGame.setGameDate(event.getGameDate());
-                    newGame.setHomeTeamId(event.getHomeTeamId());
-                    newGame.setAwayTeamId(event.getAwayTeamId());
-                    newGame.setHomeTeamScore(event.getHomeTeamScore());
-                    newGame.setAwayTeamScore(event.getAwayTeamScore());
-                    return gameRepository.save(newGame);
-                });
+            Game game = gameRepository.findById(event.getGameId()).orElseThrow();
 
             PlayerStats stats = new PlayerStats();
             stats.setPlayerId(event.getPlayerId());

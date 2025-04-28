@@ -4,9 +4,11 @@ import jakarta.validation.constraints.*;
 import lombok.Data;
 
 @Data
-public class PlayerStatsDTO {
+public class StatsDTO {
     @NotNull
     private Long playerId;
+    @NotNull
+    private Long gameId;
 
     @NotNull
     private Integer points;
