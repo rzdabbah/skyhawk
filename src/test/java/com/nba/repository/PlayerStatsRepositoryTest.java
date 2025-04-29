@@ -10,7 +10,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.Random;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -54,6 +54,8 @@ class PlayerStatsRepositoryTest {
         testStats.setSteals(2);
         testStats.setBlocks(1);
         testStats.setFouls(3);
+        testStats.setTurnovers(1);
+
         testStats.setMinutesPlayed(35.5f);
     }
 
@@ -62,7 +64,7 @@ class PlayerStatsRepositoryTest {
 
         Random rand = new Random();
 
-        jdbcTemplate.update("INSERT INTO teams (name, city) VALUES ( ?, ?) ;", "Test Team"+rand.nextInt(50), "dier el assad"+rand.nextInt(50));
+        jdbcTemplate.update("INSERT INTO teams (name, city) VALUES ( ?, ?) ;", "Test Team"+LocalDateTime.now(), "dier el assad"+LocalDateTime.now());
         return jdbcTemplate.queryForObject("SELECT max(id) from teams", Long.class);
     }
 
@@ -78,7 +80,7 @@ class PlayerStatsRepositoryTest {
 
 
         Long awayTeamId = createTestTeam();
-        jdbcTemplate.update("INSERT INTO games ( game_date, home_team_id, away_team_id , home_team_score, away_team_score) VALUES ( ?, ?, ?, ?, ?);", LocalDate.now(), teamId, awayTeamId, new Random().nextInt(100), new Random().nextInt(100));
+        jdbcTemplate.update("INSERT INTO games ( game_date, home_team_id, away_team_id , home_team_score, away_team_score) VALUES ( ?, ?, ?, ?, ?);", LocalDateTime.now(), teamId, awayTeamId, new Random().nextInt(100), new Random().nextInt(100));
         return jdbcTemplate.queryForObject("SELECT max(id) from games", Long.class);
     }
 

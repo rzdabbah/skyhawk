@@ -15,7 +15,7 @@ INSERT INTO players (first_name, last_name, team_id, position, height_cm, weight
 -- Insert sample games
 INSERT INTO games (home_team_id, away_team_id, game_date, home_team_score, away_team_score, season, status) VALUES
     (1, 2, '2024-03-15 19:30:00-07', 120, 115, '2023-24', 'COMPLETED'),
-    (3, 4, '2024-03-15 19:30:00-07', 108, 112, '2023-24', 'COMPLETED');
+    (3, 4, '2024-04-15 19:30:00-07', 111, 112, '2023-24', 'COMPLETED');
 
 -- Insert sample game events
 INSERT INTO game_events (game_id, event_type, event_time, player_id, team_id, event_data) VALUES

@@ -9,7 +9,6 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import com.nba.service.dto.PlayerAverageDTO;
 import com.nba.service.dto.TeamAverageDTO;
-import java.util.ArrayList;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
@@ -35,6 +34,8 @@ public class StatsRepository {
         stats.setSteals(rs.getInt("steals"));
         stats.setBlocks(rs.getInt("blocks"));
         stats.setFouls(rs.getInt("fouls"));
+        stats.setTurnovers(rs.getInt("turnovers"));
+
         stats.setMinutesPlayed(rs.getFloat("minutes_played"));
         return stats;
     };
@@ -49,7 +50,7 @@ public class StatsRepository {
 
     private PlayerStats insert(PlayerStats stats) {
         String sql = "INSERT INTO player_stats (player_id, game_id, points, rebounds, assists, steals, blocks, fouls, turnovers , minutes_played) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?,  ?)";
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
         
         jdbcTemplate.update(connection -> {
@@ -170,22 +171,6 @@ public class StatsRepository {
 
     public Optional<List<PlayerAverageDTO>> getPlayersSeasonAverages()  throws Exception{
         String sql = """
-            SELECT 
-    ps.player_id AS player_id,
-    p.name AS player_name,
-    g.season AS season,
-    AVG(ps.points) AS avg_points,
-    AVG(ps.rebounds) AS avg_rebounds,
-    AVG(ps.assists) AS avg_assists
-FROM player_stats ps
-JOIN players p ON ps.player_id = p.id
-JOIN games g ON ps.game_id = g.id
-GROUP BY ps.player_id, p.name, g.season
-        """;
-
-        Logger.getLogger("dddd").info(sql);
-        List<PlayerAverageDTO> result = jdbcTemplate.query(
-            """
             SELECT
                 ps.player_id AS player_id,
                 p.name AS player_name,
@@ -197,7 +182,10 @@ GROUP BY ps.player_id, p.name, g.season
             JOIN players p ON ps.player_id = p.id
             JOIN games g ON ps.game_id = g.id
             GROUP BY ps.player_id, p.name, g.season
-            """,
+        """;
+
+        Logger.getLogger(this.toString()).info(sql);
+        List<PlayerAverageDTO> result = jdbcTemplate.query(sql,
             (rs, rowNum) -> {
                 PlayerAverageDTO dto = new PlayerAverageDTO();
         dto.playerId = rs.getLong("player_id");
@@ -215,7 +203,7 @@ GROUP BY ps.player_id, p.name, g.season
         
 
 
-    public List<TeamAverageDTO> getTeamsSeasonAverages() throws Exception {
+    public Optional<List<TeamAverageDTO> >getTeamsSeasonAverages() throws Exception {
         String sql = """
             SELECT t.id AS team_id, t.name AS team_name, g.season,
                    AVG(ps.points) AS avg_points,
@@ -227,7 +215,24 @@ GROUP BY ps.player_id, p.name, g.season
             JOIN games g ON ps.game_id = g.id
             GROUP BY t.id, t.name, g.season
         """;
-
-       return null;
+        
+        Logger.getLogger(this.toString()).info(sql);
+        
+        List<TeamAverageDTO> result = jdbcTemplate.query(sql,
+            (rs, rowNum) -> {
+                TeamAverageDTO dto = new TeamAverageDTO();
+                dto.teamId = rs.getLong("team_id");
+                dto.teamName = rs.getString("team_name");
+                dto.season = rs.getString("season");
+                dto.avgPoints = rs.getDouble("avg_points");
+                dto.avgRebounds = rs.getDouble("avg_rebounds");
+                dto.avgAssists = rs.getDouble("avg_assists");
+                Logger.getLogger("SQL").info(dto.toString());
+                return dto;
+            }
+        );
+        
+        return result.isEmpty() ? Optional.empty() : Optional.of(result);
+        
     }
 } 

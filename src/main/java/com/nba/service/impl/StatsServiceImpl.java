@@ -67,7 +67,7 @@ public class StatsServiceImpl implements StatsService {
 
     @Override
     @Cacheable(value = "getTeamSeasonAverages")
-    public List<TeamAverageDTO> getTeamsSeasonAverages()  throws Exception {
+    public Optional<List<TeamAverageDTO>> getTeamsSeasonAverages()  throws Exception {
         return statsRepository.getTeamsSeasonAverages();
     }
 

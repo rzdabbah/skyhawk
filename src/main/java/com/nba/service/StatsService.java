@@ -8,7 +8,7 @@ import java.util.Optional;
 public interface StatsService {
     void logPlayerStats(StatsDTO stats);
     Optional<List<PlayerAverageDTO>> getPlayersSeasonAverages()  throws Exception ;
-    List<TeamAverageDTO> getTeamsSeasonAverages()  throws Exception ;
+    Optional<List<TeamAverageDTO>> getTeamsSeasonAverages()  throws Exception ;
     GameStatsEvent publishGameStatsEvent(GameStatsEvent event);
 
 } 
