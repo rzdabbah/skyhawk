@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class StatsRepository {
     private final JdbcTemplate jdbcTemplate;
+    private static final Logger logger = Logger.getLogger(StatsRepository.class.getName());
 
     private final RowMapper<PlayerStats> playerStatsRowMapper = (ResultSet rs, int rowNum) -> {
         PlayerStats stats = new PlayerStats();
@@ -184,7 +185,7 @@ public class StatsRepository {
             GROUP BY ps.player_id, p.name, g.season
         """;
 
-        Logger.getLogger(this.toString()).info(sql);
+        logger.info(sql);
         List<PlayerAverageDTO> result = jdbcTemplate.query(sql,
             (rs, rowNum) -> {
                 PlayerAverageDTO dto = new PlayerAverageDTO();
@@ -198,7 +199,7 @@ public class StatsRepository {
         return dto;
         }
         );
-        return result.isEmpty() ? Optional.empty() : Optional.of(result);
+        return Optional.ofNullable(result.isEmpty() ? null : result);
 }
         
 
@@ -216,7 +217,7 @@ public class StatsRepository {
             GROUP BY t.id, t.name, g.season
         """;
         
-        Logger.getLogger(this.toString()).info(sql);
+        logger.info(sql);
         
         List<TeamAverageDTO> result = jdbcTemplate.query(sql,
             (rs, rowNum) -> {
@@ -227,12 +228,12 @@ public class StatsRepository {
                 dto.avgPoints = rs.getDouble("avg_points");
                 dto.avgRebounds = rs.getDouble("avg_rebounds");
                 dto.avgAssists = rs.getDouble("avg_assists");
-                Logger.getLogger("SQL").info(dto.toString());
+                logger.info(dto.toString());
                 return dto;
             }
         );
         
-        return result.isEmpty() ? Optional.empty() : Optional.of(result);
+        return Optional.ofNullable(result.isEmpty() ? null : result);
         
     }
 } 
