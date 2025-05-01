@@ -6,7 +6,7 @@ import java.util.List;
 import com.nba.service.dto.*;
 import java.util.Optional;
 public interface StatsService {
-    void logPlayerStats(StatsDTO stats);
+    void logPlayerStats(StatsDTO stats) throws Exception;
     Optional<List<PlayerAverageDTO>> getPlayersSeasonAverages()  throws Exception ;
     Optional<List<TeamAverageDTO>> getTeamsSeasonAverages()  throws Exception ;
     GameStatsEvent publishGameStatsEvent(GameStatsEvent event);

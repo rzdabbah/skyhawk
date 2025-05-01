@@ -17,7 +17,7 @@ public class StatsController {
     private final StatsService statsService;
 
     @PostMapping
-    public ResponseEntity<Void> logStats(@Valid @RequestBody StatsDTO stats) {
+    public ResponseEntity<Void> logStats(@Valid @RequestBody StatsDTO stats) throws Exception{
         statsService.logPlayerStats(stats);
         return ResponseEntity.ok().build();
     }

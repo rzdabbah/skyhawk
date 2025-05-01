@@ -21,7 +21,7 @@ import com.nba.service.dto.PlayerAverageDTO;
 import com.nba.service.dto.TeamAverageDTO;
 import org.springframework.kafka.core.KafkaTemplate;
 import java.util.Optional;
-
+import java.util.logging.Logger;
 
 import lombok.extern.slf4j.Slf4j;
 @Slf4j
@@ -37,7 +37,15 @@ public class StatsServiceImpl implements StatsService {
     @Override
     @Transactional
     @CacheEvict(value = {"playerAverages", "teamAverages"}, allEntries = true)
-    public void logPlayerStats(StatsDTO stats) {
+    public void logPlayerStats(StatsDTO stats) throws ResponseStatusException{
+        try{
+            this.validateStatDTO(stats);
+        }
+        catch(Exception e){
+            Logger.getLogger(this.getClass().getName()).info("Validation Error" + e.getLocalizedMessage());
+            throw e;
+        }
+       
         // Verify player exists
         Player player = playerRepository.findById(stats.getPlayerId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Player not found"));
@@ -88,5 +96,10 @@ public class StatsServiceImpl implements StatsService {
         
         return event;
     }
+private void validateStatDTO(StatsDTO  dto) throws ResponseStatusException{
+    if (dto.getFouls() < 0 || dto.getFouls() > 6) throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Fouls Value must be in 0..6");
+    if (dto.getTurnovers() < 0 || dto.getTurnovers() > 48) throw new  ResponseStatusException(HttpStatus.BAD_REQUEST,"Turnovers Value must be in 0..48");
+    if (dto.getMinutesPlayed() < 0 || dto.getMinutesPlayed() > 48) throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"MinutesPlayed Value must be in 0..48");
+}
 
 } 

@@ -77,6 +77,7 @@ CREATE TABLE IF NOT EXISTS player_stats (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (player_id) REFERENCES players(id),
     FOREIGN KEY (game_id) REFERENCES games(id)
+    CONSTRAINT con1 CHECK (did > 100 AND name <> '')
 
 );
 
