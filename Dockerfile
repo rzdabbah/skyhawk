@@ -2,7 +2,7 @@
 FROM maven:3.8.4-openjdk-17 AS build
 
 # Copy the Maven cache from host if it exists
-COPY .m2 /root/.m2
+#COPY .m2/* /root/.m2
 
 # Copy the pom.xml first to cache dependencies
 COPY pom.xml /app/pom.xml
